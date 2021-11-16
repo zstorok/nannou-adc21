@@ -37,17 +37,6 @@ enum SequencerCommand {
     SetTriggerGenerator(Box<dyn TriggerModule>),
 }
 
-// impl Debug for SequencerCommand {
-//     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-//         match self {
-//             SequencerCommand::Start => write!(f, "Start"),
-//             SequencerCommand::Stop => write!(f, "Stop"),
-//             SequencerCommand::SetPitchGenerator(_) => write!(f, "SetPitchGenerator"),
-//             SequencerCommand::SetTriggerGenerator(_) => write!(f, "SetTriggerGenerator"),
-//         }
-//     }
-// }
-
 pub struct Sequencer {
     sender: mpsc::Sender<SequencerCommand>,
     _timer: Timer,
