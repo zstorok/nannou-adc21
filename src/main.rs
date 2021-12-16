@@ -2,9 +2,12 @@ use std::str::FromStr;
 
 use log::{info, LevelFilter};
 use module::PitchGeneratorType;
-use nannou::ui::widget::range_slider::Edge;
-use nannou::ui::widget::*;
-use nannou::{prelude::*, ui::widget::drop_down_list::Idx, ui::*, Ui};
+use nannou_conrod::Color;
+use nannou_conrod::widget::*;
+use nannou_conrod::prelude::*;
+use nannou::prelude::*;
+use nannou_conrod::widget::drop_down_list::Idx;
+use nannou_conrod::widget::range_slider::Edge;
 use pitch_calc::{Letter, LetterOctave, Step};
 use sequencer::{Sequencer, SequencerConfiguration};
 use simple_logger::SimpleLogger;
@@ -59,6 +62,7 @@ fn main() {
     // Disable logging for all dependencies
     SimpleLogger::new()
         .with_level(LevelFilter::Off)
+        .with_utc_timestamps()
         .with_module_level("adc21", LevelFilter::Info)
         .init()
         .unwrap();
@@ -152,19 +156,19 @@ fn pitch_generator_type_from_index(idx: Option<Idx>) -> PitchGeneratorType {
     PitchGeneratorType::from_str(PITCH_GENERATOR_TYPE_NAMES[idx.unwrap()]).unwrap()
 }
 
-
 fn model(app: &App) -> Model {
     // Create a window
     let w_id = app
         .new_window()
         .size(900, 300)
         .key_pressed(key_pressed)
-        .view(view)
+        .raw_event(raw_ui_event)
+        .view(ui_view)
         .build()
         .unwrap();
 
     // Create the UI for our window
-    let mut ui = app.new_ui().window(w_id).build().unwrap();
+    let mut ui = nannou_conrod::builder(app).window(w_id).build().unwrap();
 
     // Generate IDs for our widgets
     let ids = Ids::new(ui.widget_id_generator());
@@ -631,13 +635,10 @@ fn drop_down_list(
         .border(0.0)
 }
 
-fn view(app: &App, model: &Model, frame: Frame) {
-    // Begin drawing
-    let draw = app.draw();
+fn ui_view(app: &App, model: &Model, frame: Frame) {
+    model.ui.draw_to_frame_if_changed(app, &frame).unwrap();
+}
 
-    // Render the result of our drawing to the window's frame
-    draw.to_frame(app, &frame).unwrap();
-
-    // Draw the state of the `Ui` to the frame
-    model.ui.draw_to_frame(app, &frame).unwrap();
+fn raw_ui_event(app: &App, model: &mut Model, event: &nannou_conrod::RawWindowEvent) {
+    model.ui.handle_raw_event(app, event);
 }
